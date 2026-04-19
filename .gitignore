@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Training artifacts
+outputs/
+checkpoints/
+logs/
+wandb/
+runs/
+tensorboard/
+cache/
+
+# Hugging Face / model files
+*.bin
+*.safetensors
+*.pt
+*.ckpt
+
+# Large data artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/intermediate/*
+!data/intermediate/.gitkeep
+results/predictions/*
+!results/predictions/.gitkeep
+results/tensorboard/*
+!results/tensorboard/.gitkeep
+
+# AutoDL / temp
+tmp/
+temp/
