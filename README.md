@@ -60,7 +60,25 @@ medical-qa-posttraining/
   results/
   src/
   references/
+  third_party/
 ```
+
+## Included Framework Code
+
+为了先把项目做起来，当前仓库内已经包含一份 MedicalGPT 框架代码镜像，位置在：
+
+- [third_party/MedicalGPT](E:/MedicalGPT/MedicalGPT/medical-qa-posttraining/third_party/MedicalGPT)
+
+这样做的目的很直接：
+
+- 先保证训练代码、脚本和数据格式工具都在同一个仓库里
+- 方便后续直接修改和记录项目过程
+- 等项目跑通后，再决定是否精简为“项目代码 + 外部框架依赖”的形态
+
+当前约定：
+
+- `third_party/MedicalGPT/`：框架源码和原始脚本
+- 仓库根目录的 `docs/`、`data_cards/`、`experiments/`、`results/`：你的项目过程、实验结果和表达材料
 
 ## Current Status
 

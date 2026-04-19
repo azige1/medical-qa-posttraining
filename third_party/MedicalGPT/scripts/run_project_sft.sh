@@ -1,0 +1,36 @@
+CUDA_VISIBLE_DEVICES=0 python training/supervised_finetuning.py \
+  --model_name_or_path Qwen/Qwen3.5-2B \
+  --train_file_dir ./project_data/sft \
+  --validation_file_dir ./project_data/sft \
+  --per_device_train_batch_size 4 \
+  --per_device_eval_batch_size 1 \
+  --gradient_accumulation_steps 8 \
+  --do_train \
+  --do_eval \
+  --use_peft True \
+  --max_train_samples -1 \
+  --max_eval_samples 50 \
+  --model_max_length 1024 \
+  --num_train_epochs 2 \
+  --learning_rate 2e-5 \
+  --warmup_ratio 0.03 \
+  --weight_decay 0.05 \
+  --logging_strategy steps \
+  --logging_steps 10 \
+  --eval_steps 100 \
+  --eval_strategy steps \
+  --save_steps 200 \
+  --save_strategy steps \
+  --save_total_limit 3 \
+  --preprocessing_num_workers 4 \
+  --output_dir results/sft/qwen35_2b_sft \
+  --target_modules all \
+  --lora_rank 8 \
+  --lora_alpha 16 \
+  --lora_dropout 0.05 \
+  --torch_dtype bfloat16 \
+  --bf16 \
+  --report_to tensorboard \
+  --gradient_checkpointing True \
+  --cache_dir ./cache \
+  --flash_attn True

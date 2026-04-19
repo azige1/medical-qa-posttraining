@@ -1,0 +1,29 @@
+CUDA_VISIBLE_DEVICES=0 python training/dpo_training.py \
+  --model_name_or_path Qwen/Qwen3.5-2B \
+  --train_file_dir ./project_data/preference \
+  --validation_file_dir ./project_data/preference \
+  --per_device_train_batch_size 2 \
+  --per_device_eval_batch_size 1 \
+  --gradient_accumulation_steps 8 \
+  --do_train \
+  --do_eval \
+  --use_peft True \
+  --max_train_samples -1 \
+  --max_eval_samples 50 \
+  --max_steps 300 \
+  --eval_steps 50 \
+  --save_steps 100 \
+  --max_source_length 1024 \
+  --max_target_length 512 \
+  --output_dir results/dpo/qwen35_2b_dpo \
+  --target_modules all \
+  --lora_rank 8 \
+  --lora_alpha 16 \
+  --lora_dropout 0.05 \
+  --torch_dtype bfloat16 \
+  --bf16 True \
+  --fp16 False \
+  --report_to tensorboard \
+  --remove_unused_columns False \
+  --gradient_checkpointing True \
+  --cache_dir ./cache
