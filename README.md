@@ -14,6 +14,7 @@
 - Hardware: `AutoDL 4090 24G`
 - Mainline: `SFT + DPO`
 - Target capability: 医疗问答 + 结构化输出
+- Workflow: 先完整学知识，再做项目
 
 ## Why This Repo Exists
 
@@ -32,6 +33,20 @@
 2. 基于 `Qwen3.5-2B` 完成 SFT 和 DPO 训练
 3. 建立固定评测集，对比 baseline / SFT / DPO
 4. 记录实验结果、误差案例、方法取舍与面试表达
+
+## Stage Plan
+
+当前执行顺序固定为：
+
+1. 先学完整后训练知识链路
+2. 再锁项目定义和双主评测基线
+3. 再做 SFT 与 DPO 正式实验
+4. 最后补 RM + RLOO/PPO 小实验与项目包装
+
+完整阶段计划见：
+
+- [`docs/stage_plan.md`](docs/stage_plan.md)
+- [`docs/roadmap.md`](docs/roadmap.md)
 
 ## Training Pipeline
 
@@ -82,13 +97,13 @@ medical-qa-posttraining/
 
 ## Current Status
 
-- [ ] 锁定最终原始数据源
-- [ ] 完成第一版 SFT 数据
-- [ ] 完成 baseline 固定评测
-- [ ] 完成第一版 SFT 训练
-- [ ] 完成第一版 DPO 训练
-- [ ] 完成标准化评估和领域评估
-- [ ] 完成项目结果包装
+- [ ] 完成第一阶段：SFT 知识打底
+- [ ] 完成第二阶段：偏好学习与在线 RL 知识主线
+- [ ] 完成第三阶段：GRPO 与统一方法论收束
+- [ ] 完成第四阶段：项目定义与评测基线
+- [ ] 完成第五阶段：SFT 数据构建与 SFT 正式实验
+- [ ] 完成第六阶段：DPO 主结果 + RM/RLOO/PPO 小实验
+- [ ] 完成第七阶段：结果包装与面试表达
 
 ## Planned Metrics
 
@@ -101,10 +116,12 @@ medical-qa-posttraining/
 - `triage_match_rate`
 - 人工误差分析结论
 
-如果后续接入 `lm-evaluation-harness`，再补：
+当前固定采用双主评测：
 
-- 通用 benchmark 结果
-- baseline / SFT / DPO 对比表
+- 公开 benchmark 主评测：`C-Eval` 医学子集
+- 任务对齐主评测：自建结构化医疗评测集
+
+如果后续接入 `lm-evaluation-harness`，再补标准 benchmark 运行链路。
 
 ## Structured Output Schema
 
@@ -139,13 +156,11 @@ medical-qa-posttraining/
 
 - 基于 MedicalGPT 训练框架，完成医疗问答场景下的大模型后训练项目
 - 构建了面向结构化输出的 SFT 数据与 preference 数据
-- 基于 `Qwen3.5-2B` 完成 SFT 与 DPO 训练，并建立固定评测集进行对比
+- 基于 `Qwen3.5-2B` 完成 SFT 与 DPO 训练，并建立双主评测体系进行对比
 - 使用通用评估与领域评估结合的方法验证模型提升，并完成误差分析
 
 ## Next Step
 
-1. 确定 raw data 来源和版本
-2. 固定评测集
-3. 跑 baseline
-4. 构造第一版 SFT 数据
-5. 开始第一版 SFT 训练
+1. 完成第一阶段：SFT 知识打底
+2. 输出 SFT 数据流图、方法卡和面试答题卡
+3. 进入 RM / RLOO / PPO / DPO / ORPO 学习阶段
