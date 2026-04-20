@@ -40,6 +40,7 @@ data/intermediate/*
 !data/intermediate/.gitkeep
 project_data/raw/*
 !project_data/raw/.gitkeep
+!project_data/raw/README.md
 project_data/intermediate/*
 !project_data/intermediate/.gitkeep
 project_data/sft/*

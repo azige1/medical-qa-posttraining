@@ -7,7 +7,7 @@
 - `build_sqlite_eval_db.py`
   - 从 `schema.sql + CSV seed` 生成 SQLite 小库
 - `convert_text2sql_to_sft.py`
-  - 后续把原始 Text-to-SQL 数据转成 ShareGPT SFT 格式
+  - 把 `CSpider / Spider` 原始数据转成 ShareGPT SFT 格式
 - `build_text2sql_preference.py`
   - 后续构造 `chosen / rejected`
 

@@ -30,9 +30,27 @@ SFT 样本统一转成 ShareGPT 格式：
 
 要求：
 
-- `human` 侧包含 schema_text 和中文问题
+- `human` 侧包含 schema_text 和问题文本
 - `gpt` 侧只包含 SQL
 - gold SQL 必须能在对应数据库或官方环境中执行
+
+第一版转换入口固定为：
+
+```bash
+bash scripts/build_sft_data.sh
+```
+
+它默认读取：
+
+- `project_data/raw/cspider`
+- `project_data/raw/spider`
+
+并输出：
+
+- `project_data/sft/train/cspider_train_sft_v1.jsonl`
+- `project_data/sft/train/spider_train_sft_v1.jsonl`
+- `project_data/sft/val/cspider_dev_sft_v1.jsonl`
+- `project_data/sft/val/spider_dev_sft_v1.jsonl`
 
 ## 3. DPO 数据标准
 

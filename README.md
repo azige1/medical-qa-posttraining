@@ -169,6 +169,8 @@ medical-qa-posttraining/
 
 - baseline：
   - `bash scripts/run_baseline_eval.sh`
+- 构建 SFT 数据：
+  - `bash scripts/build_sft_data.sh`
 - SFT：
   - `bash scripts/run_sft.sh`
 - DPO：
