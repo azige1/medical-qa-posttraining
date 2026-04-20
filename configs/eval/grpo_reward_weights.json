@@ -1,0 +1,12 @@
+{
+  "parseable_sql": 0.1,
+  "safe_select_only": 0.1,
+  "schema_grounding": 0.2,
+  "execution_success": 0.2,
+  "execution_match": 0.4,
+  "penalty": {
+    "multi_statement": -1.0,
+    "non_select": -1.0,
+    "schema_violation": -0.5
+  }
+}

@@ -38,10 +38,36 @@ data/raw/*
 !data/raw/.gitkeep
 data/intermediate/*
 !data/intermediate/.gitkeep
+project_data/raw/*
+!project_data/raw/.gitkeep
+project_data/intermediate/*
+!project_data/intermediate/.gitkeep
+project_data/sft/*
+!project_data/sft/.gitkeep
+!project_data/sft/train/
+!project_data/sft/train/.gitkeep
+!project_data/sft/val/
+!project_data/sft/val/.gitkeep
+project_data/preference/*
+!project_data/preference/.gitkeep
+!project_data/preference/train/
+!project_data/preference/train/.gitkeep
+!project_data/preference/val/
+!project_data/preference/val/.gitkeep
+project_data/grpo/*
+!project_data/grpo/.gitkeep
+!project_data/grpo/train/
+!project_data/grpo/train/.gitkeep
+!project_data/grpo/val/
+!project_data/grpo/val/.gitkeep
+project_data/eval/dbs/*
+!project_data/eval/dbs/.gitkeep
 results/predictions/*
 !results/predictions/.gitkeep
 results/tensorboard/*
 !results/tensorboard/.gitkeep
+*.sqlite
+*.db
 
 # AutoDL / temp
 tmp/

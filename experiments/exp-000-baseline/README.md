@@ -2,21 +2,25 @@
 
 ## Goal
 
-建立 base model 在固定医疗评测集上的基线表现。
+建立 base model 在 `CSpider dev` 和自建 SQLite 评测集上的基线表现。
 
 ## Base Model
 
-- `Qwen/Qwen3.5-2B`
+- `Qwen/Qwen2.5-3B-Instruct`
 
 ## Data
 
-- eval set: fixed medical structured-output eval set
+- eval set 1: `CSpider dev`
+- eval set 2: `sql_eval_dev_v1`
 
 ## Inference Setup
 
-- temperature:
-- max_new_tokens:
-- system prompt version:
+- temperature: `0.2`
+- top_p: `0.9`
+- repetition_penalty: `1.05`
+- max_new_tokens: `512`
+- system prompt version: `configs/eval/text2sql_system_prompt.txt`
+- eval protocol: `CSpider dev + sql_eval_dev_v1`
 
 ## Command
 
@@ -26,9 +30,11 @@
 
 ## Results
 
-- structure_pass_rate:
-- must_include_hit_rate:
-- forbidden_violation_rate:
+- cspider_dev_execution_accuracy:
+- cspider_dev_valid_sql_rate:
+- sql_eval_dev_execution_accuracy:
+- sql_eval_dev_execution_success_rate:
+- sql_eval_dev_safe_sql_rate:
 
 ## Observations
 

@@ -1,48 +1,54 @@
-# Roadmap
+# 项目路线图
 
-## Phase 1: Learn SFT Thoroughly
+## 当前大方向
 
-- 读透 `scripts/run_sft.sh` 和 `training/supervised_finetuning.py`
-- 讲清 SFT 数据流、参数传递、LoRA / QLoRA、Trainer 启动
-- 讲透 `causal LM loss`、`teacher forcing`、`response-only SFT`
+项目正式转为：
 
-## Phase 2: Learn Preference Learning and Online RL
+- 主题：中文 Text-to-SQL 后训练
+- 主结果：`SFT + DPO`
+- 扩展：`GRPO`
+- 补充：`RM + RLOO/PPO mini`
 
-- 读透 `reward_modeling.py`
-- 先讲清 RLOO / PPO 最小闭环，再讲完整 PPO
-- 再讲 DPO / ORPO 的离线偏好优化逻辑
+## 阶段 A：任务和评测锁定
 
-## Phase 3: Learn GRPO and Build the Unified Map
-
-- 讲清 GRPO 的设计动机和 group relative reward
-- 统一 PT / SFT / RM / PPO / RLOO / DPO / ORPO / GRPO 的关系
-- 准备 1 分钟 / 3 分钟项目表达
-
-## Phase 4: Lock Project Definition and Baseline Evaluation
-
-- 锁定任务：医疗问答 + 结构化输出
-- 锁定模型：`Qwen/Qwen3.5-2B`
+- 锁定输入输出接口：`schema_text + question_zh -> SQL`
+- 锁定主模型：`Qwen/Qwen2.5-3B-Instruct`
 - 锁定双主评测：
-  - C-Eval 医学子集
-  - 自建结构化医疗评测集
-- 跑 baseline 并建立第一张实验卡
+  - `CSpider dev`
+  - `sql_eval_dev_v1 / sql_eval_report_v1`
 
-## Phase 5: Build SFT Data and Run SFT
+## 阶段 B：数据底座搭建
 
-- 从医疗主池中筛出高相关样本
-- 不直接用最终 `C-Eval` 题目召回训练数据
-- 训练第一版 SFT 模型
-- 记录 baseline vs SFT 结果和错误案例
+- 接入 `CSpider` / `Spider`
+- 构建 4 个 SQLite 小库
+- 补齐评测模板、构库脚本、执行器
 
-## Phase 6: Run DPO and Add RM/RLOO/PPO Mini Experiment
+## 阶段 C：Baseline
 
-- 构造第一版 `chosen/rejected` 偏好数据
-- 训练 DPO 作为正式主结果
-- 补一版 RM + RLOO/PPO 小实验
-- 汇总双主评测结果
+- 跑 base model
+- 固定 prompt 和 generation config
+- 记录错误类型分布
 
-## Phase 7: Package Results for Resume and Interviews
+## 阶段 D：SFT
 
-- 整理结果表、案例和方法选择理由
-- 产出简历项目描述
-- 产出面试答题模板和追问树
+- 构造 `sft_train_v1 / sft_val_v1`
+- 跑 `Base vs SFT`
+- 观察 valid SQL 和 execution accuracy 的变化
+
+## 阶段 E：DPO
+
+- 构造 `dpo_train_v1 / dpo_val_v1`
+- 跑 `Base vs SFT vs DPO`
+- 重点观察 schema grounding 和 wrong-result 是否下降
+
+## 阶段 F：GRPO
+
+- 基于 SFT checkpoint 做 reward 驱动扩展
+- 对比 `SFT vs GRPO`
+- 观察 reward 指标是否和 execution accuracy 同向改善
+
+## 阶段 G：收束与包装
+
+- 完成 README 结果区
+- 完成错误案例分析
+- 整理简历项目描述和面试答题模板

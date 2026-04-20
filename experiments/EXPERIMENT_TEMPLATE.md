@@ -17,6 +17,7 @@
 - data version:
 - train size:
 - eval size:
+- eval protocol:
 
 ## Training Setup
 
@@ -37,20 +38,24 @@
 ## Results
 
 - public benchmark:
-  - ceval_basic_medicine:
-  - ceval_clinical_medicine:
-  - ceval_physician:
+  - cspider_dev_execution_accuracy:
+  - cspider_dev_valid_sql_rate:
 - task-aligned evaluation:
-- structure_pass_rate:
-- must_include_hit_rate:
-- forbidden_violation_rate:
-- triage_match_rate:
+- execution_accuracy:
+- execution_success_rate:
+- valid_sql_rate:
+- safe_sql_rate:
+- schema_grounding_rate:
 - key observations:
 
 ## Failure Analysis
 
-- error category 1:
-- error category 2:
+- schema hallucination:
+- wrong filter:
+- wrong aggregation:
+- wrong join:
+- unsafe sql:
+- execution failure:
 - representative cases:
 
 ## Next Change

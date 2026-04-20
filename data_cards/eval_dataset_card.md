@@ -2,34 +2,42 @@
 
 ## Goal
 
-评测采用双主评测设计：
+Text-to-SQL 项目采用双主评测：
 
-- 公开 benchmark 主评测：`C-Eval` 医学子集
-- 任务对齐主评测：固定的结构化医疗评测集
+- 公开 benchmark：`CSpider` 官方 dev
+- 自建评测：`sql_eval_dev_v1` / `sql_eval_report_v1`
 
-后者用于比较：
+## Version
 
-- base model
-- SFT
-- DPO
-- RM + RLOO/PPO 小实验
+- `sql_eval_dev_v1`：100 条中文问题，用于高频调试
+- `sql_eval_report_v1`：200 条中文问题，用于最终汇报
+
+## Self-Built Eval Record Format
+
+```json
+{
+  "id": "sales-001",
+  "db_id": "sales",
+  "db_path": "project_data/eval/dbs/sales.sqlite",
+  "schema_text": "Table customers(id, name, city) ...",
+  "question_zh": "统计上海客户的订单数量",
+  "gold_sql": "SELECT COUNT(*) ...",
+  "tags": ["count", "filter"]
+}
+```
 
 ## Metrics
 
-- `structure_pass_rate`
-- `must_include_hit_rate`
-- `forbidden_violation_rate`
-- `triage_match_rate`
-- 人工案例分析
-
-补充说明：
-
-- `C-Eval` 主要看医学相关子集准确率
-- 自建评测集主要看结构化输出质量和任务目标对齐
+- `valid_sql_rate`
+- `execution_success_rate`
+- `execution_accuracy`
+- `safe_sql_rate`
+- `schema_grounding_rate`
+- 人工错误案例分析
 
 ## Split Policy
 
-- 固定小规模 eval set
-- 不参与训练
-- 每轮实验都复用同一批样本
-- 不直接用最终 `C-Eval` 题目做训练数据召回
+- 官方 `CSpider dev` 只评测，不回流训练
+- `sql_eval_dev_v1` 用于高频迭代
+- `sql_eval_report_v1` 用于最终结果展示
+- 自建评测与训练 prompt 不重合

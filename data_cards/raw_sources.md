@@ -1,17 +1,19 @@
 # Raw Sources
 
-记录原始数据来源、许可证、用途和筛选理由。
+记录 Text-to-SQL 项目的原始数据来源、许可证、用途和筛选理由。
 
 | Source | Type | License | Intended Use | Notes |
 | --- | --- | --- | --- | --- |
-| `shibing624/medical` | medical QA / medical corpus | research only, check upstream | SFT 主池 | 第一版最核心的医疗数据来源 |
-| `FreedomIntelligence/HuatuoGPT-sft-data-v1` | medical dialogue | check upstream | SFT 补充 | 用于补医疗问答表达和对话风格 |
-| high-quality Chinese ShareGPT data | general dialogue | check upstream | 通用补充 | 只做小比例补充，不冲淡医疗分布 |
-| self-built preference pairs | chosen/rejected | project-owned | DPO / RM | 围绕医疗正确性、完整性、结构化和安全性构造 |
-| `C-Eval` medical subsets | public benchmark | upstream benchmark license | 评测 | 只用于评测，不直接用于训练数据召回 |
+| `CSpider` train/dev | Chinese text-to-SQL | check upstream | SFT 主池 / benchmark | 第一版最核心的中文数据来源 |
+| `Spider` train | English text-to-SQL | check upstream | SFT 补充 | 只做结构与 SQL 多样性补充，不压过中文主池 |
+| self-built SQLite seeds | SQLite schemas + CSV seeds | project-owned | 自建评测 | 生成 `sales/hr/education/ecommerce` 小库 |
+| self-built preference pairs | chosen/rejected SQL | project-owned | DPO | 围绕执行正确性、schema grounding、只读安全性构造 |
+| self-built prompt-only GRPO set | prompt + gold_sql | project-owned | GRPO | 用于可执行 reward 的采样式训练 |
+| `BIRD` | benchmark | check upstream | stretch benchmark | 不作为第一版必交付 |
 
 ## Selection Policy
 
-- 第一版数据以医疗主数据为核心，不做大而杂的全量堆料
-- 若采用目标导向召回，只能使用独立 `seed set` 或 `retrieval-dev set`
-- 不直接用最终 `C-Eval` 题目反向筛选训练数据
+- 第一版以 `CSpider` 为中文主训练来源，不做大而杂的全量堆料
+- `Spider` 只做小比例结构增强，不让英文样本主导分布
+- benchmark 的官方 dev 不回流训练
+- 自建 SQLite 小库只服务于项目评测，不服务于训练数据召回

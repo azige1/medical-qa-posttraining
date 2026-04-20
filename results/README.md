@@ -10,8 +10,9 @@
 
 建议最终至少沉淀以下结果：
 
-- baseline / SFT / DPO 的双主评测总表
-- `C-Eval` 医学子集结果表
-- 自建结构化医疗评测集结果表
-- RM + RLOO/PPO 小实验记录
+- `Base / SFT / DPO / GRPO` 的总结果表
+- `CSpider dev` 结果表
+- 自建 SQLite 评测集结果表
+- `execution_accuracy` / `valid_sql_rate` / `safe_sql_rate` 指标表
+- `RM + RLOO/PPO mini` 小实验记录
 - 至少 20 条错误案例归类

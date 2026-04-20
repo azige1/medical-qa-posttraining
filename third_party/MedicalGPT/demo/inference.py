@@ -31,6 +31,7 @@ def stream_generate_answer(
         do_print=True,
         max_new_tokens=512,
         temperature=0.7,
+        top_p=1.0,
         repetition_penalty=1.0,
         stop_str="</s>",
 ):
@@ -46,6 +47,7 @@ def stream_generate_answer(
         max_new_tokens=max_new_tokens,
         temperature=temperature,
         do_sample=True if temperature > 0.0 else False,
+        top_p=top_p,
         repetition_penalty=repetition_penalty,
         streamer=streamer,
     )
@@ -77,6 +79,7 @@ def batch_generate_answer(
         device,
         max_new_tokens=512,
         temperature=0.7,
+        top_p=1.0,
         repetition_penalty=1.0,
         stop_str="</s>",
 ):
@@ -86,6 +89,7 @@ def batch_generate_answer(
         max_new_tokens=max_new_tokens,
         temperature=temperature,
         do_sample=True if temperature > 0.0 else False,
+        top_p=top_p,
         repetition_penalty=repetition_penalty,
     )
 
@@ -131,6 +135,7 @@ def main():
     parser.add_argument('--stop_str', default="", type=str)
     parser.add_argument("--repetition_penalty", type=float, default=1.0)
     parser.add_argument("--max_new_tokens", type=int, default=512)
+    parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument('--data_file', default=None, type=str,
                         help="A file that contains instructions (one instruction per line)")
     parser.add_argument('--interactive', action='store_true', help="Run in interactive mode (default multi-turn)")
@@ -251,6 +256,7 @@ def main():
                 do_print=True,
                 max_new_tokens=args.max_new_tokens,
                 temperature=args.temperature,
+                top_p=args.top_p,
                 repetition_penalty=args.repetition_penalty,
                 stop_str=stop_str,
             )
@@ -274,13 +280,14 @@ def main():
                 batch,
                 model,
                 tokenizer,
-                system_prompt,
-                model.device,
-                max_new_tokens=args.max_new_tokens,
-                temperature=args.temperature,
-                repetition_penalty=args.repetition_penalty,
-                stop_str=stop_str,
-            )
+                    system_prompt,
+                    model.device,
+                    max_new_tokens=args.max_new_tokens,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    repetition_penalty=args.repetition_penalty,
+                    stop_str=stop_str,
+                )
             results = []
             for example, response in zip(batch, responses):
                 print(f"===")

@@ -2,7 +2,7 @@
 
 ## Goal
 
-在第一版 SFT 模型基础上，训练第一版 DPO 模型。
+在第一版 SFT 模型基础上，训练第一版 Text-to-SQL DPO 模型。
 
 ## Data
 
@@ -25,9 +25,10 @@
 
 ## Results
 
-- structure_pass_rate:
-- must_include_hit_rate:
-- forbidden_violation_rate:
+- valid_sql_rate:
+- execution_success_rate:
+- execution_accuracy:
+- schema_grounding_rate:
 
 ## Observations
 

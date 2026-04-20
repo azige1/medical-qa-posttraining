@@ -1,0 +1,5 @@
+customer_id,customer_name,city,segment
+1,华北商贸,北京,Enterprise
+2,南方零售,深圳,SMB
+3,江城百货,武汉,Enterprise
+4,滨海超市,天津,SMB

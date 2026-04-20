@@ -2,7 +2,7 @@
 
 ## Goal
 
-训练第一版医疗 SFT 模型，并对比 baseline。
+训练第一版 Text-to-SQL SFT 模型，并对比 baseline。
 
 ## Data
 
@@ -25,9 +25,10 @@
 
 ## Results
 
-- structure_pass_rate:
-- must_include_hit_rate:
-- forbidden_violation_rate:
+- valid_sql_rate:
+- execution_success_rate:
+- execution_accuracy:
+- schema_grounding_rate:
 
 ## Observations
 

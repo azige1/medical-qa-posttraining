@@ -1,49 +1,76 @@
-# Medical QA Post-Training
+# Chinese Text-to-SQL Post-Training
 
-一个基于 MedicalGPT 训练链路搭建的医疗大模型后训练项目，用于展示完整的：
+一个基于 MedicalGPT 训练脚手架搭建的中文 Text-to-SQL / 数据分析问答后训练项目，用于展示完整的：
 
 - 数据构建
-- SFT / DPO 训练
-- 通用评估与领域评估
-- 实验记录与误差分析
-- 面试与简历项目包装
+- SFT / DPO / GRPO 训练
+- 公开 benchmark 与自建评测
+- 实验记录与错误分析
+- 简历与面试项目包装
 
 当前项目默认路线：
 
-- Base Model: `Qwen/Qwen3.5-2B`
+- Base Model: `Qwen/Qwen2.5-3B-Instruct`
 - Hardware: `AutoDL 4090 24G`
 - Mainline: `SFT + DPO`
-- Target capability: 医疗问答 + 结构化输出
-- Workflow: 先完整学知识，再做项目
+- Expansion: `GRPO`
+- Stretch: `RM + RLOO/PPO mini`
+- Target capability: 中文问题 + 数据库 schema -> 纯 SQL
 
 ## Why This Repo Exists
 
-这个仓库不是为了维护 MedicalGPT 框架本身，而是为了把基于 MedicalGPT 做的完整项目过程沉淀下来。  
-核心目标不是“跑了脚本”，而是形成一个能讲清楚的数据、训练、评估闭环。
+这个仓库不是为了维护 MedicalGPT 框架本身，而是为了把一个**可执行、可评测、可写进简历**的 Text-to-SQL 后训练项目沉淀下来。  
+框架只负责训练入口，项目真正的核心在于：
 
-项目的训练底座来自：
+- 任务定义
+- 数据构造
+- DPO / GRPO 设计
+- benchmark 与自建评测闭环
+
+训练底座来自：
 
 - [MedicalGPT](https://github.com/shibing624/MedicalGPT)
 
 ## Project Goal
 
-围绕“医疗问答 + 结构化输出”能力，构建一个完整的后训练项目：
+围绕“中文问题 + schema -> 纯 SQL”能力，构建一个完整后训练项目：
 
-1. 从原始医疗数据出发，构造 SFT 数据与偏好数据
-2. 基于 `Qwen3.5-2B` 完成 SFT 和 DPO 训练
-3. 建立固定评测集，对比 baseline / SFT / DPO
-4. 记录实验结果、误差案例、方法取舍与面试表达
+1. 从公开 Text-to-SQL 数据和自建 SQLite 小库出发，构造 SFT / DPO / GRPO 数据
+2. 基于 `Qwen/Qwen2.5-3B-Instruct` 完成 SFT 和 DPO 主线训练
+3. 用 `GRPO` 做可执行 reward 驱动的扩展实验
+4. 对比 `Base / SFT / DPO / GRPO` 的 SQL 质量和执行结果
+5. 最终为 agent / tool-use 扩展预留接口，但 v1 不直接做 agent demo
+
+## Task Definition
+
+第一版任务固定为：
+
+- 输入：`schema_text + question_zh`
+- 输出：一条 **SQLite SELECT SQL**
+
+硬约束：
+
+- 只输出 SQL，不输出解释
+- 不输出 Markdown 代码块
+- 禁止 DDL / DML / 多语句
+- 只面向 SQLite 方言
+
+详细任务规格见：
+
+- [`docs/project_task_spec.md`](docs/project_task_spec.md)
+- [`docs/sql_output_spec.md`](docs/sql_output_spec.md)
+- [`docs/preference_judging_standard.md`](docs/preference_judging_standard.md)
 
 ## Stage Plan
 
 当前执行顺序固定为：
 
 1. 先学完整后训练知识链路
-2. 再锁项目定义和双主评测基线
-3. 再做 SFT 与 DPO 正式实验
-4. 最后补 RM + RLOO/PPO 小实验与项目包装
+2. 再锁 Text-to-SQL 任务、数据源和评测基线
+3. 再做 `SFT -> DPO`
+4. 最后补 `GRPO` 和 `PPO mini`
 
-完整阶段计划见：
+完整计划见：
 
 - [`docs/stage_plan.md`](docs/stage_plan.md)
 - [`docs/roadmap.md`](docs/roadmap.md)
@@ -51,12 +78,14 @@
 ## Training Pipeline
 
 ```text
-Raw data
-  -> cleaned / normalized data
+Raw text-to-SQL data
+  -> normalized SQL data
   -> ShareGPT SFT data
-  -> chosen/rejected preference data
+  -> chosen/rejected DPO data
+  -> prompt-only GRPO data
   -> SFT
   -> DPO
+  -> GRPO
   -> evaluation
   -> error analysis
   -> resume/interview packaging
@@ -67,10 +96,11 @@ Raw data
 ```text
 medical-qa-posttraining/
   README.md
-  .gitignore
   docs/
   data_cards/
   configs/
+  scripts/
+  project_data/
   experiments/
   results/
   src/
@@ -80,66 +110,81 @@ medical-qa-posttraining/
 
 ## Included Framework Code
 
-为了先把项目做起来，当前仓库内已经包含一份 MedicalGPT 框架代码镜像，位置在：
+当前仓库内已经包含一份 MedicalGPT 代码镜像，位置在：
 
-- [third_party/MedicalGPT](E:/MedicalGPT/MedicalGPT/medical-qa-posttraining/third_party/MedicalGPT)
+- [third_party/MedicalGPT](third_party/MedicalGPT)
 
-这样做的目的很直接：
+约定如下：
 
-- 先保证训练代码、脚本和数据格式工具都在同一个仓库里
-- 方便后续直接修改和记录项目过程
-- 等项目跑通后，再决定是否精简为“项目代码 + 外部框架依赖”的形态
-
-当前约定：
-
-- `third_party/MedicalGPT/`：框架源码和原始脚本
-- 仓库根目录的 `docs/`、`data_cards/`、`experiments/`、`results/`：你的项目过程、实验结果和表达材料
+- `third_party/MedicalGPT/`：训练框架和原始 stage 入口
+- 仓库根目录的 `docs/`、`data_cards/`、`project_data/`、`src/`、`experiments/`、`results/`：本项目自己的数据、评测和实验过程
 
 ## Current Status
 
-- [ ] 完成第一阶段：SFT 知识打底
-- [ ] 完成第二阶段：偏好学习与在线 RL 知识主线
-- [ ] 完成第三阶段：GRPO 与统一方法论收束
-- [ ] 完成第四阶段：项目定义与评测基线
+- [x] 完成第一阶段：SFT 知识打底
+- [x] 完成第二阶段：偏好学习与在线 RL 知识主线
+- [x] 完成第三阶段：GRPO 与统一方法论收束
+- [ ] 完成第四阶段：Text-to-SQL 项目定义与评测基线
 - [ ] 完成第五阶段：SFT 数据构建与 SFT 正式实验
-- [ ] 完成第六阶段：DPO 主结果 + RM/RLOO/PPO 小实验
-- [ ] 完成第七阶段：结果包装与面试表达
+- [ ] 完成第六阶段：DPO 主结果 + GRPO 扩展实验
+- [ ] 完成第七阶段：PPO mini + 结果包装
 
 ## Planned Metrics
 
 第一版重点记录以下指标：
 
-- `structure_pass_rate`
-- `instruction_follow_rate`
-- `must_include_hit_rate`
-- `forbidden_violation_rate`
-- `triage_match_rate`
-- 人工误差分析结论
+- `valid_sql_rate`
+- `execution_success_rate`
+- `execution_accuracy`
+- `safe_sql_rate`
+- `schema_grounding_rate`
+- 人工错误分析结论
 
-当前固定采用双主评测：
+评测固定采用双主线：
 
-- 公开 benchmark 主评测：`C-Eval` 医学子集
-- 任务对齐主评测：自建结构化医疗评测集
+- 公开 benchmark：`CSpider` 官方 dev
+- 任务对齐评测：自建 `sql_eval_dev_v1` / `sql_eval_report_v1`
 
-如果后续接入 `lm-evaluation-harness`，再补标准 benchmark 运行链路。
+## Key Data Sources
 
-## Structured Output Schema
+- `CSpider` train/dev
+- `Spider` train
+- 自建 SQLite 小库：`sales`, `hr`, `education`, `ecommerce`
 
-第一版回答固定为 JSON：
+详细数据源说明见：
 
-```json
-{
-  "question_type": "definition | diagnosis | treatment | medication | examination | prevention | other",
-  "answer": "直接回答",
-  "key_points": ["关键点1", "关键点2"],
-  "triage_level": "low | medium | high",
-  "safety_notice": "风险提示与就医建议"
-}
-```
+- [`data_cards/raw_sources.md`](data_cards/raw_sources.md)
+
+## Configs and Protocols
+
+- 基线推理协议：[`docs/baseline_inference_protocol.md`](docs/baseline_inference_protocol.md)
+- 数据构建规范：[`docs/data_building_standard.md`](docs/data_building_standard.md)
+- 自建评测标注规范：[`docs/sql_eval_annotation_guideline.md`](docs/sql_eval_annotation_guideline.md)
+- SQL 生成 prompt：[`configs/eval/text2sql_system_prompt.txt`](configs/eval/text2sql_system_prompt.txt)
+- GRPO reward：[`configs/eval/grpo_reward_weights.json`](configs/eval/grpo_reward_weights.json)
+
+## Runbook
+
+项目根目录提供了四个直接入口：
+
+- baseline：
+  - `bash scripts/run_baseline_eval.sh`
+- SFT：
+  - `bash scripts/run_sft.sh`
+- DPO：
+  - `bash scripts/run_dpo.sh`
+- GRPO：
+  - `bash scripts/run_grpo.sh`
+
+其中：
+
+- `run_baseline_eval.sh` 会先根据 `project_data/eval/db_seeds/` 生成 SQLite 小库
+- `run_sft.sh / run_dpo.sh / run_grpo.sh` 默认读取 `project_data/` 下的项目数据目录
+- 训练真正调用的是 `third_party/MedicalGPT/` 里的底层训练代码
 
 ## Experiment Log
 
-所有实验都应记录在 `experiments/` 下，至少包括：
+所有实验都记录在 `experiments/` 下，至少包括：
 
 - 目标
 - 数据版本
@@ -152,15 +197,15 @@ medical-qa-posttraining/
 
 ## Resume Angle
 
-这个项目最终希望能支持以下表述：
+这个项目最终希望能支持如下表述：
 
-- 基于 MedicalGPT 训练框架，完成医疗问答场景下的大模型后训练项目
-- 构建了面向结构化输出的 SFT 数据与 preference 数据
-- 基于 `Qwen3.5-2B` 完成 SFT 与 DPO 训练，并建立双主评测体系进行对比
-- 使用通用评估与领域评估结合的方法验证模型提升，并完成误差分析
+- 基于 MedicalGPT 训练框架完成中文 Text-to-SQL 后训练项目
+- 构建了 `SFT / DPO / GRPO` 三阶段数据与评测闭环
+- 使用 `CSpider` 和自建 SQLite 评测集验证 SQL 生成与执行正确率
+- 以 `DPO` 作为主结果，以 `GRPO` 作为 reward 驱动扩展，并为后续 agent / tool-use 扩展预留接口
 
 ## Next Step
 
-1. 完成第一阶段：SFT 知识打底
-2. 输出 SFT 数据流图、方法卡和面试答题卡
-3. 进入 RM / RLOO / PPO / DPO / ORPO 学习阶段
+1. 接入 `CSpider / Spider` 数据并生成 `sft_train_v1`
+2. 构建 4 个 SQLite 小库与 `sql_eval_dev_v1`
+3. 跑 `Qwen/Qwen2.5-3B-Instruct` baseline

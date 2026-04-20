@@ -34,14 +34,12 @@
 ## Results
 
 - public benchmark:
-  - ceval_basic_medicine:
-  - ceval_clinical_medicine:
-  - ceval_physician:
+  - cspider_dev_exec:
 - task-aligned evaluation:
-  - structure_pass_rate:
-  - must_include_hit_rate:
-  - forbidden_violation_rate:
-  - triage_match_rate:
+  - valid_sql_rate:
+  - execution_success_rate:
+  - execution_accuracy:
+  - schema_grounding_rate:
 
 ## Observations
 
