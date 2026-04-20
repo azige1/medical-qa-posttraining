@@ -105,6 +105,7 @@ medical-qa-posttraining/
     sql_eval_annotation_guideline.md
     stage_plan.md
     roadmap.md
+    autodl_runbook.md
     interview_notes.md
   data_cards/                             # 数据来源、SFT、偏好数据、评测集说明卡
     raw_sources.md
@@ -118,6 +119,7 @@ medical-qa-posttraining/
       grpo_reward_weights.json            # GRPO reward 权重
   scripts/                                # 项目级一键入口
     build_sft_data.sh                     # CSpider / Spider -> SFT jsonl
+    check_raw_data.sh                     # 检查 raw 数据目录结构是否完整
     run_baseline_eval.sh                  # baseline + SQLite 评测
     run_sft.sh                            # SFT 训练
     run_dpo.sh                            # DPO 训练
