@@ -8,6 +8,13 @@ BASE_MODEL="${BASE_MODEL:-Qwen/Qwen2.5-3B-Instruct}"
 TRAIN_FILE_DIR="${TRAIN_FILE_DIR:-project_data/sft/train}"
 VALIDATION_FILE_DIR="${VALIDATION_FILE_DIR:-project_data/sft/val}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/sft/qwen25_3b_text2sql_sft_v1}"
+REPORT_TO="${REPORT_TO:-tensorboard}"
+RUN_NAME="${RUN_NAME:-qwen25_3b_text2sql_sft_v1}"
+
+if [ "$REPORT_TO" = "wandb" ] || [ "$REPORT_TO" = "all" ]; then
+  export WANDB_PROJECT="${WANDB_PROJECT:-text2sql-posttraining}"
+  export WANDB_NAME="${WANDB_NAME:-$RUN_NAME}"
+fi
 
 EXTRA_EVAL_ARGS=()
 VALIDATION_FILES=("$VALIDATION_FILE_DIR"/**/*.jsonl)
@@ -47,7 +54,8 @@ python third_party/MedicalGPT/training/supervised_finetuning.py \
   --lora_dropout 0.05 \
   --torch_dtype bfloat16 \
   --bf16 \
-  --report_to tensorboard \
+  --report_to "$REPORT_TO" \
+  --run_name "$RUN_NAME" \
   --gradient_checkpointing True \
   --cache_dir cache \
   --flash_attn True

@@ -8,6 +8,14 @@ MODEL_NAME_OR_PATH="${MODEL_NAME_OR_PATH:-outputs/merged/qwen25_3b_text2sql_sft_
 TRAIN_FILE_DIR="${TRAIN_FILE_DIR:-project_data/preference/train}"
 VALIDATION_FILE_DIR="${VALIDATION_FILE_DIR:-project_data/preference/val}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/dpo/qwen25_3b_text2sql_dpo_v1}"
+BETA="${BETA:-0.1}"
+REPORT_TO="${REPORT_TO:-tensorboard}"
+RUN_NAME="${RUN_NAME:-qwen25_3b_text2sql_dpo_v1}"
+
+if [ "$REPORT_TO" = "wandb" ] || [ "$REPORT_TO" = "all" ]; then
+  export WANDB_PROJECT="${WANDB_PROJECT:-text2sql-posttraining}"
+  export WANDB_NAME="${WANDB_NAME:-$RUN_NAME}"
+fi
 
 EXTRA_EVAL_ARGS=()
 VALIDATION_FILES=("$VALIDATION_FILE_DIR"/**/*.jsonl)
@@ -32,7 +40,7 @@ python third_party/MedicalGPT/training/dpo_training.py \
   --save_steps 100 \
   --max_source_length 1024 \
   --max_target_length 512 \
-  --beta 0.1 \
+  --beta "$BETA" \
   --output_dir "$OUTPUT_DIR" \
   --target_modules all \
   --lora_rank 8 \
@@ -41,7 +49,8 @@ python third_party/MedicalGPT/training/dpo_training.py \
   --torch_dtype bfloat16 \
   --bf16 True \
   --fp16 False \
-  --report_to tensorboard \
+  --report_to "$REPORT_TO" \
+  --run_name "$RUN_NAME" \
   --remove_unused_columns False \
   --gradient_checkpointing True \
   --cache_dir cache

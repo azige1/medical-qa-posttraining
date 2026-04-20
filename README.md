@@ -246,6 +246,27 @@ medical-qa-posttraining/
 - `run_sft.sh / run_dpo.sh / run_grpo.sh` 默认读取 `project_data/` 下的项目数据目录
 - 训练真正调用的是 `third_party/MedicalGPT/` 里的底层训练代码
 
+## Experiment Tracking
+
+默认日志后端是 `tensorboard`。如果你想在 AutoDL 上直接用 `WandB` 看训练曲线、loss、eval 指标，可以直接在项目层脚本切换：
+
+- SFT：
+  - `REPORT_TO=wandb WANDB_PROJECT=text2sql-posttraining RUN_NAME=qwen25_3b_sft_v1 bash scripts/run_sft.sh`
+- DPO：
+  - `REPORT_TO=wandb WANDB_PROJECT=text2sql-posttraining RUN_NAME=qwen25_3b_dpo_v1 bash scripts/run_dpo.sh`
+- GRPO：
+  - `REPORT_TO=wandb WANDB_PROJECT=text2sql-posttraining RUN_NAME=qwen25_3b_grpo_v1 bash scripts/run_grpo.sh`
+
+约定如下：
+
+- `REPORT_TO` 默认是 `tensorboard`
+- 当 `REPORT_TO=wandb` 或 `REPORT_TO=all` 时，脚本会自动读取：
+  - `WANDB_PROJECT`
+  - `WANDB_NAME`，默认回退到 `RUN_NAME`
+- 第一次使用前需要在训练环境里执行：
+  - `wandb login`
+- 训练环境还需要安装 `wandb`
+
 ## Experiment Log
 
 所有实验都记录在 `experiments/` 下，至少包括：

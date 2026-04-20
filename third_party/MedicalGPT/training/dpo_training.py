@@ -159,6 +159,8 @@ class ScriptArguments:
         metadata={"help": "Remove unused columns from the dataset if `datasets.Dataset` is used"},
     )
     report_to: Optional[str] = field(default="tensorboard", metadata={"help": "Report to wandb or tensorboard"})
+    run_name: Optional[str] = field(default="dpo_v1", metadata={"help": "Experiment run name"})
+    beta: Optional[float] = field(default=0.1, metadata={"help": "DPO beta temperature"})
 
     def __post_init__(self):
         if self.model_name_or_path is None:
@@ -559,7 +561,8 @@ def main():
         bf16=args.bf16,
         fp16=args.fp16,
         remove_unused_columns=args.remove_unused_columns,
-        run_name=f"dpo_v1",
+        run_name=args.run_name,
+        beta=args.beta,
     )
 
     # Initialize DPO trainer

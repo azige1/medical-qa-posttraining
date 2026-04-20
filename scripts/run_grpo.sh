@@ -8,6 +8,13 @@ MODEL_NAME_OR_PATH="${MODEL_NAME_OR_PATH:-outputs/merged/qwen25_3b_text2sql_sft_
 TRAIN_FILE_DIR="${TRAIN_FILE_DIR:-project_data/grpo/train}"
 VALIDATION_FILE_DIR="${VALIDATION_FILE_DIR:-project_data/grpo/val}"
 OUTPUT_DIR="${OUTPUT_DIR:-outputs/grpo/qwen25_3b_text2sql_grpo_v1}"
+REPORT_TO="${REPORT_TO:-tensorboard}"
+RUN_NAME="${RUN_NAME:-qwen25_3b_text2sql_grpo_v1}"
+
+if [ "$REPORT_TO" = "wandb" ] || [ "$REPORT_TO" = "all" ]; then
+  export WANDB_PROJECT="${WANDB_PROJECT:-text2sql-posttraining}"
+  export WANDB_NAME="${WANDB_NAME:-$RUN_NAME}"
+fi
 
 EXTRA_VAL_ARGS=()
 VALIDATION_FILES=("$VALIDATION_FILE_DIR"/**/*.jsonl)
@@ -39,4 +46,5 @@ python src/train/grpo_text2sql.py \
   --save_steps 50 \
   --save_strategy steps \
   --save_total_limit 3 \
-  --report_to tensorboard
+  --report_to "$REPORT_TO" \
+  --run_name "$RUN_NAME"
