@@ -108,14 +108,28 @@ def is_safe_select(sql: str) -> tuple[bool, str]:
 def connect_readonly(db_path: str | Path) -> sqlite3.Connection:
     db_path = Path(db_path).resolve()
     uri = f"file:{db_path.as_posix()}?mode=ro"
-    return sqlite3.connect(uri, uri=True)
+    connection = sqlite3.connect(uri, uri=True)
+    # Some Spider/CSpider SQLite files contain non-UTF8 text values. Let sqlite
+    # return raw bytes and normalize them in Python so evaluation doesn't fail
+    # before we can compare prediction and gold execution results.
+    connection.text_factory = bytes
+    return connection
+
+
+def _decode_bytes(value: bytes) -> str:
+    for encoding in ("utf-8", "utf-8-sig", "gb18030", "latin-1", "cp1252"):
+        try:
+            return value.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return value.decode("utf-8", errors="replace")
 
 
 def _normalize_value(value: Any) -> Any:
     if isinstance(value, float):
         return round(value, 6)
     if isinstance(value, bytes):
-        return value.decode("utf-8", errors="replace")
+        return _decode_bytes(value)
     return value
 
 

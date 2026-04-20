@@ -119,10 +119,16 @@ medical-qa-posttraining/
       grpo_reward_weights.json            # GRPO reward 权重
   scripts/                                # 项目级一键入口
     build_sft_data.sh                     # CSpider / Spider -> SFT jsonl
+    build_cspider_eval.sh                # CSpider dev -> 执行型评测 jsonl
     check_raw_data.sh                     # 检查 raw 数据目录结构是否完整
+    run_baseline_all.sh                  # 一键 baseline（self / cspider / dual）
     run_baseline_eval.sh                  # baseline + SQLite 评测
+    run_cspider_baseline_eval.sh         # CSpider dev baseline + 执行型评测
+    run_sft_all.sh                       # 一键 SFT（本地模型路径 + HF 缓存 + wandb）
     run_sft.sh                            # SFT 训练
+    run_dpo_all.sh                        # 一键 DPO（本地输出路径 + HF 缓存 + wandb）
     run_dpo.sh                            # DPO 训练
+    run_grpo_all.sh                       # 一键 GRPO（本地输出路径 + HF 缓存 + wandb）
     run_grpo.sh                           # GRPO 训练
   project_data/                           # 项目自己的数据目录
     raw/                                  # 原始官方数据，手动下载后放这里
@@ -247,6 +253,37 @@ medical-qa-posttraining/
 - `run_baseline_eval.sh` 会先根据 `project_data/eval/db_seeds/` 生成 SQLite 小库
 - `run_sft.sh / run_dpo.sh / run_grpo.sh` 默认读取 `project_data/` 下的项目数据目录
 - 训练真正调用的是 `third_party/MedicalGPT/` 里的底层训练代码
+
+## Current Execution Flow
+
+如果你现在按项目主线推进，执行顺序固定为：
+
+1. 检查原始数据目录
+   - `bash scripts/check_raw_data.sh`
+2. 构建 SFT 数据
+   - `bash scripts/build_sft_data.sh`
+3. 跑 baseline
+   - `MODE=dual bash scripts/run_baseline_all.sh`
+4. 跑 SFT
+   - `bash scripts/run_sft_all.sh`
+5. 构造 preference 数据并跑 DPO
+   - `bash scripts/run_dpo_all.sh`
+6. 最后补 GRPO 扩展实验
+   - `bash scripts/run_grpo_all.sh`
+
+当前最需要理解的文件是：
+
+- `scripts/run_baseline_all.sh`
+- `scripts/run_cspider_baseline_eval.sh`
+- `scripts/run_sft_all.sh`
+- `src/data/build_cspider_exec_eval.py`
+- `src/eval/run_text2sql_inference.py`
+- `src/eval/eval_text2sql_sqlite.py`
+- `src/eval/sql_utils.py`
+
+对应的数据流是：
+
+`CSpider dev raw json -> build_cspider_exec_eval.py -> cspider_dev_exec_v1.jsonl -> run_text2sql_inference.py -> predictions jsonl -> eval_text2sql_sqlite.py -> report json`
 
 ## Experiment Tracking
 

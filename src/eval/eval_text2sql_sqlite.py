@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -21,11 +22,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prediction_file", required=True)
     parser.add_argument("--report_file", required=True)
     parser.add_argument("--error_file", required=True)
+    parser.add_argument("--report_to", default="none")
+    parser.add_argument("--run_name", default="")
     return parser.parse_args()
+
+
+def maybe_init_wandb(report_to: str, run_name: str):
+    if report_to not in {"wandb", "all"}:
+        return None
+    import wandb
+
+    return wandb.init(
+        project=os.environ.get("WANDB_PROJECT", "text2sql-posttraining"),
+        name=os.environ.get("WANDB_NAME") or run_name or None,
+        id=os.environ.get("WANDB_RUN_ID") or None,
+        resume="allow",
+    )
 
 
 def main() -> None:
     args = parse_args()
+    wandb_run = maybe_init_wandb(args.report_to, args.run_name)
     eval_samples = load_jsonl(args.eval_file)
     predictions = load_jsonl(args.prediction_file)
     prediction_map = {row.get("id"): row for row in predictions}
@@ -113,6 +130,18 @@ def main() -> None:
         json.dump(report, handle, ensure_ascii=False, indent=2)
 
     dump_jsonl(args.error_file, error_rows)
+    if wandb_run:
+        metrics = {}
+        for key, value in report.items():
+            if isinstance(value, dict):
+                for sub_key, sub_value in value.items():
+                    metrics[f"baseline_eval/{key}/{sub_key}"] = sub_value
+            else:
+                metrics[f"baseline_eval/{key}"] = value
+        wandb_run.log(metrics)
+        wandb_run.summary["baseline_eval/report_file"] = str(args.report_file)
+        wandb_run.summary["baseline_eval/error_file"] = str(args.error_file)
+        wandb_run.finish()
 
 
 if __name__ == "__main__":

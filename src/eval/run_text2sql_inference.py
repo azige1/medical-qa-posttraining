@@ -1,5 +1,7 @@
 import argparse
+import os
 import sys
+import time
 from pathlib import Path
 
 import torch
@@ -35,6 +37,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval_batch_size", type=int, default=None)
     parser.add_argument("--load_in_4bit", action="store_true")
     parser.add_argument("--load_in_8bit", action="store_true")
+    parser.add_argument("--report_to", default="none")
+    parser.add_argument("--run_name", default="")
+    parser.add_argument("--wandb_log_steps", type=int, default=1)
     return parser.parse_args()
 
 
@@ -60,19 +65,34 @@ def load_generation_overrides(args: argparse.Namespace) -> dict[str, float | int
     return config
 
 
-def main() -> None:
-    args = parse_args()
-    generation_cfg = load_generation_overrides(args)
+def maybe_init_wandb(report_to: str, run_name: str):
+    if report_to not in {"wandb", "all"}:
+        return None
+    import wandb
 
-    tokenizer_path = args.tokenizer_path or args.base_model
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True, padding_side="left")
+    return wandb.init(
+        project=os.environ.get("WANDB_PROJECT", "text2sql-posttraining"),
+        name=os.environ.get("WANDB_NAME") or run_name or None,
+        id=os.environ.get("WANDB_RUN_ID") or None,
+        resume="allow",
+    )
 
-    model_kwargs = {
+
+def build_model_kwargs(args: argparse.Namespace) -> dict[str, object]:
+    model_kwargs: dict[str, object] = {
         "trust_remote_code": True,
-        "torch_dtype": "auto",
         "low_cpu_mem_usage": True,
         "device_map": "auto",
+        "torch_dtype": torch.bfloat16 if torch.cuda.is_available() else "auto",
     }
+    if torch.cuda.is_available():
+        try:
+            import flash_attn  # noqa: F401
+
+            model_kwargs["attn_implementation"] = "flash_attention_2"
+            print("[INFO] flash_attn detected, using flash_attention_2")
+        except Exception:
+            print("[INFO] flash_attn not available, using default attention implementation")
     if args.load_in_8bit:
         model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
     elif args.load_in_4bit:
@@ -80,6 +100,18 @@ def main() -> None:
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.bfloat16,
         )
+    return model_kwargs
+
+
+def main() -> None:
+    args = parse_args()
+    generation_cfg = load_generation_overrides(args)
+    wandb_run = maybe_init_wandb(args.report_to, args.run_name)
+
+    tokenizer_path = args.tokenizer_path or args.base_model
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, trust_remote_code=True, padding_side="left")
+
+    model_kwargs = build_model_kwargs(args)
 
     base_model = AutoModelForCausalLM.from_pretrained(args.base_model, **model_kwargs)
     try:
@@ -101,8 +133,10 @@ def main() -> None:
     prompts = [render_text2sql_prompt(sample) for sample in samples]
     results = []
     batch_size = int(generation_cfg["eval_batch_size"])
+    total_samples = len(prompts)
+    infer_start = time.perf_counter()
 
-    for start in range(0, len(prompts), batch_size):
+    for batch_index, start in enumerate(range(0, len(prompts), batch_size), start=1):
         batch_samples = samples[start:start + batch_size]
         batch_prompts = prompts[start:start + batch_size]
         outputs = batch_generate_answer(
@@ -128,7 +162,27 @@ def main() -> None:
                 }
             )
 
+        if wandb_run and batch_index % max(args.wandb_log_steps, 1) == 0:
+            completed = len(results)
+            elapsed = max(time.perf_counter() - infer_start, 1e-6)
+            wandb_run.log(
+                {
+                    "baseline_inference/completed_samples": completed,
+                    "baseline_inference/total_samples": total_samples,
+                    "baseline_inference/progress": completed / total_samples if total_samples else 0.0,
+                    "baseline_inference/batch_index": batch_index,
+                    "baseline_inference/samples_per_second": completed / elapsed,
+                },
+                step=completed,
+            )
+
     dump_jsonl(args.output_file, results)
+    if wandb_run:
+        elapsed = max(time.perf_counter() - infer_start, 1e-6)
+        wandb_run.summary["baseline_inference/output_file"] = str(args.output_file)
+        wandb_run.summary["baseline_inference/total_samples"] = total_samples
+        wandb_run.summary["baseline_inference/samples_per_second"] = total_samples / elapsed
+        wandb_run.finish()
 
 
 if __name__ == "__main__":

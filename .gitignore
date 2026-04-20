@@ -73,6 +73,7 @@ project_data/grpo/train/*
 !project_data/grpo/val/.gitkeep
 project_data/grpo/val/*
 !project_data/grpo/val/.gitkeep
+project_data/eval/cspider_dev_exec_v1.jsonl
 project_data/eval/dbs/*
 !project_data/eval/dbs/.gitkeep
 results/predictions/*
