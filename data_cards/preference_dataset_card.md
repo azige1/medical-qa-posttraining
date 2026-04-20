@@ -16,6 +16,20 @@
 {"conversations": [{"from": "human", "value": "根据给定 schema 生成 SQL ..."}], "chosen": "SELECT ...", "rejected": "SELECT ..."}
 ```
 
+## Build Command
+
+```bash
+bash scripts/build_preference_data.sh
+```
+
+默认输出：
+
+- `project_data/preference/train/cspider_train_dpo_v1.jsonl`
+- `project_data/preference/train/spider_train_dpo_v1.jsonl`
+- `project_data/preference/val/cspider_val_dpo_v1.jsonl`
+- `project_data/preference/val/spider_val_dpo_v1.jsonl`
+- `project_data/intermediate/preference_build_report_v1.json`
+
 ## Preference Dimensions
 
 `chosen/rejected` 的判优顺序固定为：
@@ -37,6 +51,21 @@
   - 错排序 / LIMIT
   - 错 JOIN
 - 部分正确但结果不等价的 SQL
+
+## Current V1 Builder
+
+当前 `v1` 先用 rule-based rejected，覆盖以下错误类型：
+
+- `wrong_limit`
+- `wrong_order`
+- `wrong_filter`
+- `missing_filter`
+- `wrong_aggregation`
+- `distinct_change`
+- `wrong_column`
+- `wrong_table`
+- `schema_hallucination`
+- `execution_failure`
 
 ## Version History
 

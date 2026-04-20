@@ -148,3 +148,22 @@ bash scripts/build_sft_data.sh
 bash scripts/run_baseline_eval.sh
 REPORT_TO=wandb WANDB_PROJECT=text2sql-posttraining RUN_NAME=qwen25_3b_sft_v1 bash scripts/run_sft.sh
 ```
+
+## 10. DPO handoff after SFT
+
+After SFT finishes, use this fixed handoff:
+
+```bash
+bash scripts/merge_sft_adapter.sh
+bash scripts/build_preference_data.sh
+bash scripts/run_dpo_all.sh
+```
+
+If you want the full one-line sequence with explicit run names:
+
+```bash
+RUN_NAME=qwen25_3b_sft_v1 bash scripts/run_sft_all.sh
+BASE_MODEL=/root/autodl-tmp/models/Qwen2.5-3B-Instruct LORA_MODEL=outputs/sft/qwen25_3b_text2sql_sft_v1 OUTPUT_DIR=outputs/merged/qwen25_3b_text2sql_sft_v1 bash scripts/merge_sft_adapter.sh
+bash scripts/build_preference_data.sh
+RUN_NAME=qwen25_3b_dpo_v1 MODEL_NAME_OR_PATH=outputs/merged/qwen25_3b_text2sql_sft_v1 bash scripts/run_dpo_all.sh
+```

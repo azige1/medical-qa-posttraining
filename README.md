@@ -120,7 +120,9 @@ medical-qa-posttraining/
   scripts/                                # 项目级一键入口
     build_sft_data.sh                     # CSpider / Spider -> SFT jsonl
     build_cspider_eval.sh                # CSpider dev -> 执行型评测 jsonl
+    build_preference_data.sh             # raw train -> DPO preference jsonl
     check_raw_data.sh                     # 检查 raw 数据目录结构是否完整
+    merge_sft_adapter.sh                 # 合并 SFT LoRA adapter -> merged model
     run_baseline_all.sh                  # 一键 baseline（self / cspider / dual）
     run_baseline_eval.sh                  # baseline + SQLite 评测
     run_cspider_baseline_eval.sh         # CSpider dev baseline + 执行型评测
@@ -266,9 +268,13 @@ medical-qa-posttraining/
    - `MODE=dual bash scripts/run_baseline_all.sh`
 4. 跑 SFT
    - `bash scripts/run_sft_all.sh`
-5. 构造 preference 数据并跑 DPO
+5. 合并 SFT adapter
+   - `bash scripts/merge_sft_adapter.sh`
+6. 构造 preference 数据
+   - `bash scripts/build_preference_data.sh`
+7. 跑 DPO
    - `bash scripts/run_dpo_all.sh`
-6. 最后补 GRPO 扩展实验
+8. 最后补 GRPO 扩展实验
    - `bash scripts/run_grpo_all.sh`
 
 当前最需要理解的文件是：
