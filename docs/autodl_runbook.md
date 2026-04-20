@@ -154,6 +154,7 @@ REPORT_TO=wandb WANDB_PROJECT=text2sql-posttraining RUN_NAME=qwen25_3b_sft_v1 ba
 After SFT finishes, use this fixed handoff:
 
 ```bash
+bash scripts/run_sft_eval_all.sh
 bash scripts/merge_sft_adapter.sh
 bash scripts/build_preference_data.sh
 bash scripts/run_dpo_all.sh

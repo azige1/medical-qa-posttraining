@@ -3,6 +3,8 @@ set -euo pipefail
 
 MODE="${MODE:-dual}"
 BASE_MODEL="${BASE_MODEL:-/root/autodl-tmp/models/Qwen2.5-3B-Instruct}"
+LORA_MODEL="${LORA_MODEL:-}"
+MODEL_TAG="${MODEL_TAG:-base_qwen25_3b}"
 REPORT_TO="${REPORT_TO:-wandb}"
 WANDB_PROJECT="${WANDB_PROJECT:-text2sql-posttraining}"
 HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
@@ -14,6 +16,8 @@ MKL_NUM_THREADS="${MKL_NUM_THREADS:-8}"
 
 echo "[baseline_all] MODE=$MODE"
 echo "[baseline_all] BASE_MODEL=$BASE_MODEL"
+echo "[baseline_all] LORA_MODEL=${LORA_MODEL:-<none>}"
+echo "[baseline_all] MODEL_TAG=$MODEL_TAG"
 echo "[baseline_all] REPORT_TO=$REPORT_TO"
 
 mkdir -p logs cache
@@ -32,6 +36,8 @@ export MKL_NUM_THREADS
 run_self_eval() {
   REPORT_TO="$REPORT_TO" \
   WANDB_PROJECT="$WANDB_PROJECT" \
+  MODEL_TAG="$MODEL_TAG" \
+  LORA_MODEL="$LORA_MODEL" \
   RUN_NAME="${RUN_NAME_SELF:-qwen25_3b_sql_eval_dev_v1}" \
   BASE_MODEL="$BASE_MODEL" \
   bash scripts/run_baseline_eval.sh | tee "logs/${RUN_NAME_SELF:-qwen25_3b_sql_eval_dev_v1}.log"
@@ -40,6 +46,8 @@ run_self_eval() {
 run_cspider_eval() {
   REPORT_TO="$REPORT_TO" \
   WANDB_PROJECT="$WANDB_PROJECT" \
+  MODEL_TAG="$MODEL_TAG" \
+  LORA_MODEL="$LORA_MODEL" \
   RUN_NAME="${RUN_NAME_CSPIDER:-qwen25_3b_cspider_dev_exec_v1}" \
   BASE_MODEL="$BASE_MODEL" \
   bash scripts/run_cspider_baseline_eval.sh | tee "logs/${RUN_NAME_CSPIDER:-qwen25_3b_cspider_dev_exec_v1}.log"
