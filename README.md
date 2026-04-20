@@ -95,18 +95,80 @@ Raw text-to-SQL data
 
 ```text
 medical-qa-posttraining/
-  README.md
-  docs/
-  data_cards/
+  README.md                               # 项目总入口
+  docs/                                   # 任务定义、评测规范、方法对比、路线图
+    project_task_spec.md
+    sql_output_spec.md
+    data_building_standard.md
+    baseline_inference_protocol.md
+    preference_judging_standard.md
+    sql_eval_annotation_guideline.md
+    stage_plan.md
+    roadmap.md
+    interview_notes.md
+  data_cards/                             # 数据来源、SFT、偏好数据、评测集说明卡
+    raw_sources.md
+    sft_dataset_card.md
+    preference_dataset_card.md
+    eval_dataset_card.md
   configs/
-  scripts/
-  project_data/
-  experiments/
-  results/
-  src/
-  references/
+    eval/
+      text2sql_system_prompt.txt          # SQL 生成 system prompt
+      text2sql_generation.json            # baseline / eval decoding 参数
+      grpo_reward_weights.json            # GRPO reward 权重
+  scripts/                                # 项目级一键入口
+    build_sft_data.sh                     # CSpider / Spider -> SFT jsonl
+    run_baseline_eval.sh                  # baseline + SQLite 评测
+    run_sft.sh                            # SFT 训练
+    run_dpo.sh                            # DPO 训练
+    run_grpo.sh                           # GRPO 训练
+  project_data/                           # 项目自己的数据目录
+    raw/                                  # 原始官方数据，手动下载后放这里
+      README.md
+    intermediate/                         # 中间产物、统计报告
+    sft/
+      train/                              # SFT 训练集 jsonl
+      val/                                # SFT 验证集 jsonl
+    preference/
+      train/                              # DPO / RM 训练集 jsonl
+      val/                                # DPO / RM 验证集 jsonl
+    grpo/
+      train/                              # GRPO prompt-only 训练集
+      val/                                # GRPO prompt-only 验证集
+    eval/
+      README.md
+      sql_eval_dev_v1.jsonl               # 自建开发评测集
+      sql_eval_report_v1.jsonl            # 最终汇报评测集
+      db_seeds/                           # 自建 SQLite 小库的 schema + csv seed
+      dbs/                                # 根据 seed 生成的 sqlite 数据库
+  src/                                    # 项目自己的 Python 代码
+    data/
+      build_sqlite_eval_db.py             # seed -> sqlite
+      convert_text2sql_to_sft.py          # Spider/CSpider -> SFT
+    eval/
+      sql_utils.py                        # SQL 清洗、执行、安全检查、错误分类
+      run_text2sql_inference.py           # 固定 prompt 推理
+      eval_text2sql_sqlite.py             # SQLite 执行评测
+    train/
+      grpo_text2sql.py                    # 项目版 GRPO 训练入口
+  experiments/                            # 实验记录
+    EXPERIMENT_TEMPLATE.md
+    exp-000-baseline/
+    exp-001-sft-v1/
+    exp-002-dpo-v1/
+    exp-003-rm-rloo-or-ppo-mini/
+  results/                                # 结果表、图、预测样例、错误案例
+    tables/
+    figures/
+    predictions/
+    case_studies/
+    tensorboard/
+  references/                             # 外部项目和论文笔记
   third_party/
+    MedicalGPT/                           # 底层训练框架镜像
 ```
+
+以后目录结构如果发生变化，README 里的这部分会同步更新，不再只写顶层目录名。
 
 ## Included Framework Code
 
